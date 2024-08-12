@@ -1,0 +1,37 @@
+name: travel_app
+description: "A Test Flutter project."
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: '>=3.4.1 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.19.0
+  flutter_bloc: ^8.1.6
+  equatable: ^2.0.5
+  flutter_map: ^7.0.2
+  latlong2: ^0.9.1
+  dartz: ^0.10.1
+  injectable: ^2.4.4
+  get_it: ^7.7.0
+  shared_preferences: ^2.3.1
+  internet_connection_checker: ^1.0.0+1
+  http: ^1.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  build_runner: ^2.4.11
+  injectable_generator: ^2.6.2
+
+flutter:
+  uses-material-design: true
+  generate: true
+  assets:
+    - lib/l10n/

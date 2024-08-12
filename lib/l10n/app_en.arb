@@ -1,0 +1,19 @@
+{
+    "appTitle": "MapBox Example",
+    "whereFrom": "Where from...",
+    "whereTo": "Where to a place {number}",
+    "next": "NEXT",
+    "serverFailure": "Server error occurred. Please try again later.",
+    "cacheFailure": "Cache error occurred. Please restart the app.",
+    "networkFailure": "Network error occurred. Please check your internet connection.",
+    "invalidInputFailure": "Invalid input. Please check your data and try again.",
+    "unexpectedError": "Unexpected error occurred. Please try again later.",
+    "@whereTo": {
+        "placeholders": {
+            "number": {
+                "type": "int",
+                "example": "1"
+            }
+        }
+    }
+}
