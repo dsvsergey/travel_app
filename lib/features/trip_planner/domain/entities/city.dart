@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 
-import '../../data/models/city_model.dart';
+import 'range.dart';
 
 class City extends Equatable {
   final String id;
@@ -9,6 +10,8 @@ class City extends Equatable {
   final String countryCode;
   final double latitude;
   final double longitude;
+  final Color color;
+  final RangeDate? rangeDate;
 
   const City({
     required this.id,
@@ -17,30 +20,11 @@ class City extends Equatable {
     required this.countryCode,
     required this.latitude,
     required this.longitude,
+    required this.color,
+    this.rangeDate,
   });
 
   @override
-  List<Object> get props => [id, name, country, latitude, longitude];
-}
-
-extension CityModelX on City {
-  CityModel toModel() => CityModel(
-        id: id,
-        name: name,
-        country: country,
-        latitude: latitude,
-        longitude: longitude,
-        countryCode: countryCode,
-      );
-}
-
-extension CityX on CityModel {
-  City toEntity() => City(
-        id: id,
-        name: name,
-        country: country,
-        latitude: latitude,
-        longitude: longitude,
-        countryCode: countryCode,
-      );
+  List<Object?> get props =>
+      [id, name, country, countryCode, latitude, longitude, color, rangeDate];
 }
