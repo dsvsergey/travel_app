@@ -6,6 +6,7 @@ import '../../../../core/error/failures.dart';
 import '../../domain/entities/city.dart';
 import '../../domain/repositories/city_repository.dart';
 import '../datasources/city_local_data_source.dart';
+import '../models/city_model.dart';
 
 @Singleton(as: CityRepository)
 class CityRepositoryImpl implements CityRepository {
