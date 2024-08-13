@@ -3,6 +3,7 @@
     "whereFrom": "Where from...",
     "whereTo": "Where to a place {number}",
     "next": "NEXT",
+    "done": "DONE",
     "serverFailure": "Server error occurred. Please try again later.",
     "cacheFailure": "Cache error occurred. Please restart the app.",
     "networkFailure": "Network error occurred. Please check your internet connection.",
