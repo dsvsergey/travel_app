@@ -26,7 +26,7 @@ class CityModel extends City {
       longitude: json['longitude'],
       color: json['color'] != null
           ? Color(json['color'])
-          : ColorUtils.generatePastelColor(),
+          : ColorUtils.generateVibrantColor(),
       rangeDate: json['range_date'] != null
           ? RangeDateModel.fromJson(json['range_date']).toEntity()
           : null,
