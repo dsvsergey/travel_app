@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+
 import '../localization/app_localizations.dart';
 
 abstract class Failure extends Equatable {
