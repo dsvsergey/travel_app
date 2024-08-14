@@ -6,6 +6,7 @@ import 'package:latlong2/latlong.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../block/city_selection_bloc.dart';
 import '../widgets/city_list_overlay.dart';
+import '../widgets/city_selection_range_date.dart';
 
 class CitySelectionPage extends StatelessWidget {
   const CitySelectionPage({super.key});
@@ -16,8 +17,21 @@ class CitySelectionPage extends StatelessWidget {
   }
 }
 
-class CitySelectionView extends StatelessWidget {
+class CitySelectionView extends StatefulWidget {
   const CitySelectionView({super.key});
+
+  @override
+  State<CitySelectionView> createState() => _CitySelectionViewState();
+}
+
+class _CitySelectionViewState extends State<CitySelectionView> {
+  bool _isOverlayVisible = true;
+
+  void _toggleOverlayVisibility(bool isVisible) {
+    setState(() {
+      _isOverlayVisible = isVisible;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +42,7 @@ class CitySelectionView extends StatelessWidget {
           FlutterMap(
             options: MapOptions(
               initialCenter: const LatLng(48.8566, 2.3522), // Paris
-              initialZoom: 5.0,
+              initialZoom: 6.0,
               onTap: (tapPosition, point) {
                 context.read<CitySelectionBloc>().add(SelectLocation(point));
               },
@@ -57,20 +71,50 @@ class CitySelectionView extends StatelessWidget {
               ),
             ],
           ),
-          const CityListOverlay(),
+          if (_isOverlayVisible) const CityListOverlay(),
           Positioned(
             left: 20,
             right: 20,
             bottom: 20,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.amber,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-              ),
-              onPressed: () {
-                // Navigate to next screen
+            child: BlocBuilder<CitySelectionBloc, CitySelectionState>(
+              builder: (context, state) {
+                return ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.amber,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                  onPressed: () {
+                    _toggleOverlayVisibility(false);
+                    showBottomSheet(
+                      showDragHandle: true,
+                      context: context,
+                      // isScrollControlled: true,
+                      builder: (BuildContext context) {
+                        return SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.8,
+                          width: MediaQuery.of(context).size.width - 10,
+                          child: CitySelectionRangeDate(
+                            cities: state.cities,
+                            selectedDates: state.selectedDates,
+                            onCitySelected: (city) {
+                              context
+                                  .read<CitySelectionBloc>()
+                                  .add(SelectCity(city));
+                            },
+                            onDateSelected: (dates) {
+                              context
+                                  .read<CitySelectionBloc>()
+                                  .add(UpdateDates(dates));
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        );
+                      },
+                    ).closed.then((_) => _toggleOverlayVisibility(true));
+                  },
+                  child: Text(l10n.next),
+                );
               },
-              child: Text(l10n.next),
             ),
           ),
         ],

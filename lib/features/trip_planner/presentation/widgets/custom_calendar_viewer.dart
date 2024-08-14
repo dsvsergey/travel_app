@@ -5,8 +5,8 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 
-import '../models/date_model.dart';
-import '../models/range_model.dart';
+import '../../domain/entities/date.dart';
+import '../../domain/entities/range.dart';
 
 enum CustomCalendarType {
   view,
@@ -39,6 +39,9 @@ List<Date>? dates;
 List<RangeDate>? ranges;
 
 class CustomCalendarViewer extends StatefulWidget {
+  final bool disableSwipe;
+  final List<RangeDate>? initialRanges;
+
   /// - Here you can add specific active days dates
   /// - This  will take Date Model
   /// - if you leave the color or text color null this will take the colors from active color for background and active day num style for text color
@@ -346,6 +349,8 @@ class CustomCalendarViewer extends StatefulWidget {
     ),
     this.addDatesMargin =
         const EdgeInsets.only(left: 45, right: 45, top: 10, bottom: 0),
+    this.disableSwipe = false,
+    this.initialRanges,
   });
 
   @override
@@ -416,8 +421,12 @@ class _CustomCalendarViewerState extends State<CustomCalendarViewer>
     );
     _tweenAnimation = Tween<double>(begin: 1, end: 0).animate(_controller);
     dates = widget.dates ?? [];
-    ranges = widget.ranges ?? [];
+    ranges = widget.initialRanges ?? widget.ranges ?? [];
     _offsetAnimation = _offsetTween.animate(_controller);
+
+    if (ranges!.isNotEmpty) {
+      currentDate = ranges![0].start;
+    }
   }
 
   @override
@@ -760,7 +769,6 @@ class _CustomCalendarViewerState extends State<CustomCalendarViewer>
                             width: widget.movingArrowSize * 2,
                             child: SvgPicture.asset(
                               'assets/icons/back.svg',
-                              package: 'custom_calendar_viewer',
                               colorFilter: ColorFilter.mode(
                                   widget.movingArrowColor, BlendMode.srcIn),
                               width: widget.movingArrowSize,
@@ -785,7 +793,6 @@ class _CustomCalendarViewerState extends State<CustomCalendarViewer>
                             width: widget.movingArrowSize * 2,
                             child: SvgPicture.asset(
                               'assets/icons/forward.svg',
-                              package: 'custom_calendar_viewer',
                               colorFilter: ColorFilter.mode(
                                   widget.movingArrowColor, BlendMode.srcIn),
                               width: widget.movingArrowSize,
@@ -1341,7 +1348,6 @@ class _CustomCalendarViewerState extends State<CustomCalendarViewer>
                           width: widget.movingArrowSize * 2,
                           child: SvgPicture.asset(
                             'assets/icons/back.svg',
-                            package: 'custom_calendar_viewer',
                             colorFilter: ColorFilter.mode(
                                 widget.movingArrowColor, BlendMode.srcIn),
                             width: widget.movingArrowSize,
@@ -1377,7 +1383,6 @@ class _CustomCalendarViewerState extends State<CustomCalendarViewer>
                           width: widget.movingArrowSize * 2,
                           child: SvgPicture.asset(
                             'assets/icons/forward.svg',
-                            package: 'custom_calendar_viewer',
                             colorFilter: ColorFilter.mode(
                                 widget.movingArrowColor, BlendMode.srcIn),
                             width: widget.movingArrowSize,
@@ -1453,139 +1458,134 @@ class _CustomCalendarViewerState extends State<CustomCalendarViewer>
     for (int i = 0; i < 31; i++) {
       widgetKey.add(GlobalKey());
     }
-    return GestureDetector(
-      onHorizontalDragEnd: (DragEndDetails details) {
-        if (widget.calendarType != CustomCalendarType.viewFullYear) {
-          if (details.primaryVelocity != null &&
-              widget.animateDirection ==
-                  CustomCalendarAnimatedDirection.horizontal) {
-            if (details.primaryVelocity! > 0) {
-              // User dragged from left to right
-              backArrow();
-            } else {
-              // User dragged from right to left
-              forwardArrow();
-            }
-          }
-        }
-      },
-      onVerticalDragEnd: (DragEndDetails details) {
-        if (widget.calendarType != CustomCalendarType.viewFullYear) {
-          if (details.primaryVelocity != null &&
-              widget.animateDirection ==
-                  CustomCalendarAnimatedDirection.vertical) {
-            if (details.primaryVelocity! > 0) {
-              // User dragged from down to up
-              backArrow();
-            } else {
-              // User dragged from up to down
-              forwardArrow();
-            }
-          }
-        }
-      },
-      child: Container(
-        color: widget.daysBodyBackground,
-        padding: widget.calendarStyle == CustomCalendarStyle.withBorder
-            ? edge(padding: const EdgeInsets.all(3))
-            : edge(padding: EdgeInsets.zero),
-        height: ((extraDays == 6 && daysInMonth > 29) ||
-                ((extraDays == 5 && daysInMonth > 30) && daysInMonth == 31))
-            ? 300
-            : (extraDays == 0 && daysInMonth == 28)
-                ? 205
-                : 255,
-        child: GridView.builder(
-          padding: EdgeInsets.zero,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 7),
-          itemBuilder: (_, index) {
-            if (count == 0) {
-              int dateIndex = dates == null
-                  ? -1
-                  : dates!.indexWhere((Date date) =>
-                      date.date.year == currentDate.year &&
-                      date.date.month == currentDate.month &&
-                      date.date.day == ((index + 1) - extraDays));
-              List inRange = checkInRange(DateTime(currentDate.year,
-                  currentDate.month, (index + 1) - extraDays));
-              return widget.showTooltip
-                  ? InkWell(
-                      key: widgetKey[index - extraDays],
-                      onTap: () {
-                        onDateTaped(index);
-                        if (showOverlay && overlayEntry != null) {
-                          overlayEntry!.builder(context);
-                        }
-                        if (showOverlay) {
-                          showOrHideOverlay(
-                              context,
-                              inRange,
-                              dateIndex,
-                              widgetKey[index -
-                                  extraDays]); // Close the current tooltip
-                          showOrHideOverlay(
-                              context,
-                              inRange,
-                              dateIndex,
-                              widgetKey[index -
-                                  extraDays]); // Show the new tooltip immediately
-                        } else {
-                          showOrHideOverlay(context, inRange, dateIndex,
-                              widgetKey[index - extraDays]); // Show the tooltip
-                        }
-                      },
-                      child: dateDayWidget(
-                        inRange,
-                        index,
-                        extraDays,
-                        dateIndex,
-                      ),
-                    )
-                  : InkWell(
-                      splashColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
-                      hoverColor: Colors.transparent,
-                      focusColor: Colors.transparent,
-                      onTap: () {
-                        if (widget.closeDateBefore != null) {
-                          if (DateTime(
-                                      widget.closeDateBefore!.year,
-                                      widget.closeDateBefore!.month,
-                                      widget.closeDateBefore!.day)
-                                  .isBefore(DateTime(
-                                      currentDate.year,
-                                      currentDate.month,
-                                      (index + 1) - extraDays)) ||
-                              DateTime(
-                                      widget.closeDateBefore!.year,
-                                      widget.closeDateBefore!.month,
-                                      widget.closeDateBefore!.day) ==
-                                  DateTime(currentDate.year, currentDate.month,
-                                      (index + 1) - extraDays)) {
-                            onDateTaped(index);
-                          }
-                        } else {
+
+    Widget content = Container(
+      color: widget.daysBodyBackground,
+      padding: widget.calendarStyle == CustomCalendarStyle.withBorder
+          ? edge(padding: const EdgeInsets.all(3))
+          : edge(padding: EdgeInsets.zero),
+      height: ((extraDays == 6 && daysInMonth > 29) ||
+              ((extraDays == 5 && daysInMonth > 30) && daysInMonth == 31))
+          ? 300
+          : (extraDays == 0 && daysInMonth == 28)
+              ? 205
+              : 255,
+      child: GridView.builder(
+        padding: EdgeInsets.zero,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate:
+            const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 7),
+        itemBuilder: (_, index) {
+          if (count == 0) {
+            int dateIndex = dates == null
+                ? -1
+                : dates!.indexWhere((Date date) =>
+                    date.date.year == currentDate.year &&
+                    date.date.month == currentDate.month &&
+                    date.date.day == ((index + 1) - extraDays));
+            List inRange = checkInRange(DateTime(
+                currentDate.year, currentDate.month, (index + 1) - extraDays));
+            return widget.showTooltip
+                ? InkWell(
+                    key: widgetKey[index - extraDays],
+                    onTap: () {
+                      onDateTaped(index);
+                      if (showOverlay && overlayEntry != null) {
+                        overlayEntry!.builder(context);
+                      }
+                      if (showOverlay) {
+                        showOrHideOverlay(context, inRange, dateIndex,
+                            widgetKey[index - extraDays]);
+                        showOrHideOverlay(context, inRange, dateIndex,
+                            widgetKey[index - extraDays]);
+                      } else {
+                        showOrHideOverlay(context, inRange, dateIndex,
+                            widgetKey[index - extraDays]);
+                      }
+                    },
+                    child: dateDayWidget(
+                      inRange,
+                      index,
+                      extraDays,
+                      dateIndex,
+                    ),
+                  )
+                : InkWell(
+                    splashColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                    hoverColor: Colors.transparent,
+                    focusColor: Colors.transparent,
+                    onTap: () {
+                      if (widget.closeDateBefore != null) {
+                        if (DateTime(
+                                    widget.closeDateBefore!.year,
+                                    widget.closeDateBefore!.month,
+                                    widget.closeDateBefore!.day)
+                                .isBefore(DateTime(
+                                    currentDate.year,
+                                    currentDate.month,
+                                    (index + 1) - extraDays)) ||
+                            DateTime(
+                                    widget.closeDateBefore!.year,
+                                    widget.closeDateBefore!.month,
+                                    widget.closeDateBefore!.day) ==
+                                DateTime(currentDate.year, currentDate.month,
+                                    (index + 1) - extraDays)) {
                           onDateTaped(index);
                         }
-                      },
-                      child: dateDayWidget(
-                        inRange,
-                        index,
-                        extraDays,
-                        dateIndex,
-                      ),
-                    );
-            } else {
-              count--;
-              return const SizedBox();
-            }
-          },
-          itemCount: daysInMonth + extraDays,
-        ),
+                      } else {
+                        onDateTaped(index);
+                      }
+                    },
+                    child: dateDayWidget(
+                      inRange,
+                      index,
+                      extraDays,
+                      dateIndex,
+                    ),
+                  );
+          } else {
+            count--;
+            return const SizedBox();
+          }
+        },
+        itemCount: daysInMonth + extraDays,
       ),
     );
+
+    if (widget.disableSwipe) {
+      return content;
+    } else {
+      return GestureDetector(
+        onHorizontalDragEnd: (DragEndDetails details) {
+          if (widget.calendarType != CustomCalendarType.viewFullYear) {
+            if (details.primaryVelocity != null &&
+                widget.animateDirection ==
+                    CustomCalendarAnimatedDirection.horizontal) {
+              if (details.primaryVelocity! > 0) {
+                backArrow();
+              } else {
+                forwardArrow();
+              }
+            }
+          }
+        },
+        onVerticalDragEnd: (DragEndDetails details) {
+          if (widget.calendarType != CustomCalendarType.viewFullYear) {
+            if (details.primaryVelocity != null &&
+                widget.animateDirection ==
+                    CustomCalendarAnimatedDirection.vertical) {
+              if (details.primaryVelocity! > 0) {
+                backArrow();
+              } else {
+                forwardArrow();
+              }
+            }
+          }
+        },
+        child: content,
+      );
+    }
   }
 
   Widget buildDayNames() {
@@ -1679,15 +1679,19 @@ class _CustomCalendarViewerState extends State<CustomCalendarViewer>
                 children: [
                   if (inRange[0] != -1 &&
                       (inRange[1] == 'start' || inRange[1] == 'end'))
-                    CustomPaint(
-                      painter: DiagonalPainter(
-                        startColor: ranges![inRange[0]].startColor ??
-                            widget.activeColor,
-                        endColor:
+                    Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            ranges![inRange[0]].startColor ??
+                                widget.activeColor,
                             ranges![inRange[0]].endColor ?? widget.activeColor,
-                        isStart: inRange[1] == 'start',
+                          ],
+                        ),
                       ),
-                      child: Container(),
                     )
                   else
                     Container(
@@ -2090,11 +2094,14 @@ class DiagonalPainter extends CustomPainter {
   final Color startColor;
   final Color endColor;
   final bool isStart;
+  final double radius;
 
-  DiagonalPainter(
-      {required this.startColor,
-      required this.endColor,
-      required this.isStart});
+  DiagonalPainter({
+    required this.startColor,
+    required this.endColor,
+    required this.isStart,
+    this.radius = 30.0, // Додайте цей параметр для контролю радіусу
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -2102,12 +2109,15 @@ class DiagonalPainter extends CustomPainter {
 
     final path = Path();
     if (isStart) {
-      path.moveTo(0, 0);
+      path.moveTo(0, radius);
+      path.quadraticBezierTo(0, 0, radius, 0);
       path.lineTo(size.width, 0);
       path.lineTo(0, size.height);
       path.close();
     } else {
-      path.moveTo(size.width, size.height);
+      path.moveTo(size.width, size.height - radius);
+      path.quadraticBezierTo(
+          size.width, size.height, size.width - radius, size.height);
       path.lineTo(0, size.height);
       path.lineTo(size.width, 0);
       path.close();

@@ -17,7 +17,7 @@ class CityButtonList extends StatefulWidget {
 }
 
 class _CityButtonListState extends State<CityButtonList> {
-  int? _selectedIndex;
+  int? _selectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +27,7 @@ class _CityButtonListState extends State<CityButtonList> {
       children: List.generate(widget.cities.length, (index) {
         final city = widget.cities[index];
         final isSelected = _selectedIndex == index;
+        final textColor = _getTextColor(city.color);
 
         return isSelected
             ? FilledButton(
@@ -34,12 +35,16 @@ class _CityButtonListState extends State<CityButtonList> {
                 style: FilledButton.styleFrom(
                   backgroundColor: city.color,
                 ),
-                child: Text(city.name),
+                child: Text(
+                  city.name,
+                  style: TextStyle(color: textColor),
+                ),
               )
             : OutlinedButton(
                 onPressed: () => _onPressed(index),
                 style: OutlinedButton.styleFrom(
                   side: BorderSide(color: city.color),
+                  foregroundColor: city.color,
                 ),
                 child: Text(city.name),
               );
@@ -52,5 +57,14 @@ class _CityButtonListState extends State<CityButtonList> {
       _selectedIndex = index;
     });
     widget.onCitySelected(index, widget.cities[index]);
+  }
+
+  Color _getTextColor(Color backgroundColor) {
+    double luminance = (0.299 * backgroundColor.red +
+            0.587 * backgroundColor.green +
+            0.114 * backgroundColor.blue) /
+        255;
+
+    return luminance > 0.5 ? Colors.black : Colors.white;
   }
 }

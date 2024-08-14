@@ -1,12 +1,15 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:latlong2/latlong.dart';
+
 import '../../../../core/usecases/usecase.dart';
+import '../../../../core/util/color_utils.dart';
 import '../../data/datasources/geocoding_service.dart';
 import '../../domain/entities/city.dart';
-import '../../domain/usecases/get_cities.dart';
 import '../../domain/usecases/add_city.dart';
+import '../../domain/usecases/get_cities.dart';
 import '../../domain/usecases/remove_city.dart';
 
 part 'city_selection_event.dart';
@@ -27,6 +30,8 @@ class CitySelectionBloc extends Bloc<CitySelectionEvent, CitySelectionState> {
     on<SelectLocation>(_onSelectLocation);
     on<AddSelectedCity>(_onAddSelectedCity);
     on<RemoveSelectedCity>(_onRemoveCity);
+    on<UpdateDates>(_onUpdateDates);
+    on<SelectCity>(_onSelectCity);
   }
 
   void _onLoadCities(LoadCities event, Emitter<CitySelectionState> emit) async {
@@ -58,6 +63,7 @@ class CitySelectionBloc extends Bloc<CitySelectionEvent, CitySelectionState> {
           countryCode: locationInfo.countryCode,
           latitude: state.selectedLocation!.latitude,
           longitude: state.selectedLocation!.longitude,
+          color: ColorUtils.generateVibrantColor(),
         );
         final result = await addCity(newCity);
         result.fold(
@@ -77,5 +83,13 @@ class CitySelectionBloc extends Bloc<CitySelectionEvent, CitySelectionState> {
       (failure) => emit(state.copyWith(error: failure.toString())),
       (_) => add(LoadCities()),
     );
+  }
+
+  void _onUpdateDates(UpdateDates event, Emitter<CitySelectionState> emit) {
+    emit(state.copyWith(selectedDates: event.dates));
+  }
+
+  void _onSelectCity(SelectCity event, Emitter<CitySelectionState> emit) {
+    emit(state.copyWith(selectedCity: event.city));
   }
 }
