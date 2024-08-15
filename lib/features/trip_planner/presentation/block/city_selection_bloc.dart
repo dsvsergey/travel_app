@@ -8,9 +8,11 @@ import '../../../../core/usecases/usecase.dart';
 import '../../../../core/util/color_utils.dart';
 import '../../data/datasources/geocoding_service.dart';
 import '../../domain/entities/city.dart';
+import '../../domain/entities/reorder_cities_params.dart';
 import '../../domain/usecases/add_city.dart';
 import '../../domain/usecases/get_cities.dart';
 import '../../domain/usecases/remove_city.dart';
+import '../../domain/usecases/reorder_cities.dart';
 
 part 'city_selection_event.dart';
 part 'city_selection_state.dart';
@@ -20,11 +22,13 @@ class CitySelectionBloc extends Bloc<CitySelectionEvent, CitySelectionState> {
   final GetCities getCities;
   final AddCity addCity;
   final RemoveCity removeCity;
+  final ReorderCities reorderCities;
 
   CitySelectionBloc({
     required this.getCities,
     required this.addCity,
     required this.removeCity,
+    required this.reorderCities,
   }) : super(CitySelectionState.initial()) {
     on<LoadCities>(_onLoadCities);
     on<SelectLocation>(_onSelectLocation);
@@ -32,6 +36,7 @@ class CitySelectionBloc extends Bloc<CitySelectionEvent, CitySelectionState> {
     on<RemoveSelectedCity>(_onRemoveCity);
     on<UpdateDates>(_onUpdateDates);
     on<SelectCity>(_onSelectCity);
+    on<ReorderCitiesEvent>(_onReorderCities);
   }
 
   void _onLoadCities(LoadCities event, Emitter<CitySelectionState> emit) async {
@@ -64,6 +69,7 @@ class CitySelectionBloc extends Bloc<CitySelectionEvent, CitySelectionState> {
           latitude: state.selectedLocation!.latitude,
           longitude: state.selectedLocation!.longitude,
           color: ColorUtils.generateVibrantColor(),
+          index: state.cities.length,
         );
         final result = await addCity(newCity);
         result.fold(
@@ -91,5 +97,21 @@ class CitySelectionBloc extends Bloc<CitySelectionEvent, CitySelectionState> {
 
   void _onSelectCity(SelectCity event, Emitter<CitySelectionState> emit) {
     emit(state.copyWith(selectedCity: event.city));
+  }
+
+  void _onReorderCities(
+      ReorderCitiesEvent event, Emitter<CitySelectionState> emit) async {
+    final params = ReorderCitiesParams(
+      cities: state.cities,
+      oldIndex: event.oldIndex,
+      newIndex: event.newIndex,
+    );
+
+    final result = await reorderCities(params);
+
+    result.fold(
+      (failure) => emit(state.copyWith(error: failure.toString())),
+      (updatedCities) => emit(state.copyWith(cities: updatedCities)),
+    );
   }
 }

@@ -47,6 +47,7 @@ class _CitySelectionRangeDateState extends State<CitySelectionRangeDate> {
               });
               widget.onCitySelected(city);
             },
+            onReorder: (value) {},
           ),
           const SizedBox(height: 16),
           CustomCalendarViewer(

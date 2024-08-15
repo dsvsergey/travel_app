@@ -2100,7 +2100,7 @@ class DiagonalPainter extends CustomPainter {
     required this.startColor,
     required this.endColor,
     required this.isStart,
-    this.radius = 30.0, // Додайте цей параметр для контролю радіусу
+    this.radius = 30.0,
   });
 
   @override

@@ -46,3 +46,13 @@ class SelectCity extends CitySelectionEvent {
   @override
   List<Object> get props => [city];
 }
+
+class ReorderCitiesEvent extends CitySelectionEvent {
+  final int oldIndex;
+  final int newIndex;
+
+  const ReorderCitiesEvent({required this.oldIndex, required this.newIndex});
+
+  @override
+  List<Object> get props => [oldIndex, newIndex];
+}

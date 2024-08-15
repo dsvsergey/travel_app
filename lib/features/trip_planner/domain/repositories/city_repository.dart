@@ -7,4 +7,5 @@ abstract class CityRepository {
   Future<Either<Failure, List<City>>> getCities();
   Future<Either<Failure, void>> addCity(City city);
   Future<Either<Failure, void>> removeCity(String cityId);
+  Future<Either<Failure, List<City>>> updateCities(List<City> cities);
 }

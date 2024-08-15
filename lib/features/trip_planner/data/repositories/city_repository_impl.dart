@@ -57,4 +57,17 @@ class CityRepositoryImpl implements CityRepository {
       return Left(CacheFailure());
     }
   }
+
+  @override
+  Future<Either<Failure, List<City>>> updateCities(List<City> cities) async {
+    try {
+      final cityModels = cities.map((city) => city.toModel()).toList();
+
+      await localDataSource.cacheCities(cityModels);
+
+      return Right(cities);
+    } on CacheException {
+      return Left(CacheFailure());
+    }
+  }
 }

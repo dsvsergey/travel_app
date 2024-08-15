@@ -5,16 +5,16 @@ import '../../domain/entities/city.dart';
 import 'range_date_model.dart';
 
 class CityModel extends City {
-  const CityModel({
-    required super.id,
-    required super.name,
-    required super.country,
-    required super.countryCode,
-    required super.latitude,
-    required super.longitude,
-    required super.color,
-    super.rangeDate,
-  });
+  const CityModel(
+      {required super.id,
+      required super.name,
+      required super.country,
+      required super.countryCode,
+      required super.latitude,
+      required super.longitude,
+      required super.color,
+      super.rangeDate,
+      super.index});
 
   factory CityModel.fromJson(Map<String, dynamic> json) {
     return CityModel(
@@ -30,6 +30,7 @@ class CityModel extends City {
       rangeDate: json['range_date'] != null
           ? RangeDateModel.fromJson(json['range_date']).toEntity()
           : null,
+      index: json['index'],
     );
   }
 
@@ -43,6 +44,7 @@ class CityModel extends City {
       'longitude': longitude,
       'color': color.value,
       'range_date': rangeDate?.toModel().toJson(),
+      'index': index
     };
   }
 }
@@ -57,6 +59,7 @@ extension CityModelX on City {
         countryCode: countryCode,
         color: color,
         rangeDate: rangeDate,
+        index: index,
       );
 }
 
@@ -70,5 +73,6 @@ extension CityX on CityModel {
         countryCode: countryCode,
         color: color,
         rangeDate: rangeDate,
+        index: index,
       );
 }
